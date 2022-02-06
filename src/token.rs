@@ -85,8 +85,12 @@ impl Client {
         let fut = self.inner.request(req);
         async {
             use bytes::Buf as _;
-
-            let (parts, body) = fut.await?.into_parts();
+            println!("..from authz client");
+            let resp = fut.await?;
+            println!("{:?}", resp);
+            let (parts, body) = resp.into_parts();
+            println!("{:?}", parts);
+            println!("{:?}", body);
             match parts.status {
                 StatusCode::OK => {
                     let buf = aggregate(body).await?;
