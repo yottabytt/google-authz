@@ -2,7 +2,7 @@ mod credentials;
 mod token;
 
 pub use credentials::Credentials;
-pub use token::{Token, TokenSource};
+pub use token::{Token, TokenSource, Error};
 
 #[cfg(feature = "client")]
 pub mod client;
