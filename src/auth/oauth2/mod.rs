@@ -43,7 +43,7 @@ impl Oauth2 {
             info!("can skip poll ready");
             return Poll::Ready(Ok(()));
         }
-        info!("cannot skip poll ready");
+        //info!("cannot skip poll ready");
         self.inner.try_write().unwrap().poll_ready(cx)
     }
 
