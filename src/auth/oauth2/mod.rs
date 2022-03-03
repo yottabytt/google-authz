@@ -84,7 +84,7 @@ impl Inner {
                         Ok(token) => {
                             let expiry = token.expiry;
                             self.state = State::Fetched { current: token };
-                            info!("fetched token: expiry={:?}", expiry);
+                            info!("fetched token: expiry={:?} state={:?}", expiry, self.state);
                             break Poll::Ready(Ok(()));
                         }
                         Err(err) => {
