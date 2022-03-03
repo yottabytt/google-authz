@@ -42,6 +42,7 @@ impl Oauth2 {
         if self.inner.try_read().unwrap().can_skip_poll_ready() {
             return Poll::Ready(Ok(()));
         }
+        println!("cannot skip poll ready");
         self.inner.try_write().unwrap().poll_ready(cx)
     }
 
