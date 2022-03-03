@@ -107,7 +107,7 @@ impl Inner {
         loop {
             match self.state {
                 State::NotFetched => {
-                    trace!("token is not fetched");
+                    info!("token is not fetched");
                     self.state = State::Fetching {
                         future: RefGuard::new(self.fetcher.fetch()),
                         attempts: 1,
@@ -122,7 +122,7 @@ impl Inner {
                     if !current.expired(Instant::now()) {
                         break Poll::Ready(Ok(()));
                     }
-                    trace!("token will expire: expiry={:?}", current.expiry);
+                    info!("token will expire: expiry={:?}", current.expiry);
                     self.state = State::Refetching {
                         future: RefGuard::new(self.fetcher.fetch()),
                         attempts: 1,
