@@ -73,7 +73,6 @@ impl Inner {
     }
 
     #[inline]
-    #[instrument(skip(cx))]
     fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<auth::Result<()>> {
         macro_rules! poll {
             ($variant:ident, $future:expr, $attempts:ident) => {
@@ -119,8 +118,12 @@ impl Inner {
                     };
                     continue;
                 }
-                State::Fetching { ref mut future, attempts } => poll!(Fetching, future, attempts),
+                State::Fetching { ref mut future, attempts } => {
+                    info!("about to fetch token");
+                    poll!(Fetching, future, attempts)
+                }
                 State::Refetching { ref mut future, attempts, ref last } => {
+                    info!("about to refetch token");
                     poll!(Refetching, future, attempts, last)
                 }
                 State::Fetched { ref current } => {
