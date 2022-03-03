@@ -39,15 +39,15 @@ impl Oauth2 {
     }
 
     pub fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<auth::Result<()>> {
-        if self.inner.read().can_skip_poll_ready() {
+        if self.inner.try_read().unwrap().can_skip_poll_ready() {
             return Poll::Ready(Ok(()));
         }
-        self.inner.write().poll_ready(cx)
+        self.inner.try_write().unwrap().poll_ready(cx)
     }
 
     #[inline]
     pub fn add_header<B>(&self, mut req: Request<B>) -> Request<B> {
-        req.headers_mut().insert(AUTHORIZATION, self.inner.read().value());
+        req.headers_mut().insert(AUTHORIZATION, self.inner.try_read().unwrap().value());
         req
     }
 }
