@@ -80,7 +80,7 @@ impl Inner {
                 match $future.get_mut().as_mut().poll(cx) {
                     Poll::Ready(resp) => match resp.and_then(token::Token::try_from) {
                         Ok(token) => {
-                            trace!("fetched token: expiry={:?}", token.expiry);
+                            info!("fetched token: expiry={:?}", token.expiry);
                             self.state = State::Fetched { current: token };
                             break Poll::Ready(Ok(()));
                         }
