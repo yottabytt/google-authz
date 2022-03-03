@@ -10,6 +10,8 @@ use futures_util::{
 };
 use hyper::Request;
 
+use tracing::info;
+
 use crate::{
     auth::{self, Auth, Config},
     credentials::Credentials,
@@ -125,11 +127,11 @@ where
     fn call(&mut self, req: Request<B>) -> Self::Future {
         match self.auth.call(req) {
             Ok(req) => {
-                println!("auth call is ok");
+                info!("auth call is ok");
                 Either::Left(self.service.call(req).map_err(Error::Service))
             }
             Err(err) => {
-                println!("auth call is err");
+                info!("auth call is err");
                 Either::Right(future::ready(Err(Error::GoogleAuthz(err))))
             }
         }

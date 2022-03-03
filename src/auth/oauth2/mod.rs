@@ -40,10 +40,10 @@ impl Oauth2 {
 
     pub fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<auth::Result<()>> {
         if self.inner.try_read().unwrap().can_skip_poll_ready() {
-            println!("can skip poll ready");
+            info!("can skip poll ready");
             return Poll::Ready(Ok(()));
         }
-        println!("cannot skip poll ready");
+        info!("cannot skip poll ready");
         self.inner.try_write().unwrap().poll_ready(cx)
     }
 
@@ -107,7 +107,7 @@ impl Inner {
         }
 
         loop {
-            println!("loopin baby");
+            info!("loopin baby");
             match self.state {
                 State::NotFetched => {
                     info!("token is not fetched");
