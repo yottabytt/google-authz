@@ -11,7 +11,7 @@ use hyper::{
     Request,
 };
 use parking_lot::RwLock;
-use tracing::{info, trace};
+use tracing::{info, instrument};
 
 use crate::{auth, sync::RefGuard};
 
@@ -42,7 +42,7 @@ impl Oauth2 {
         if self.inner.try_read().unwrap().can_skip_poll_ready() {
             info!("can skip poll ready");
             return Poll::Ready(Ok(()));
-        }
+        } 
         //info!("cannot skip poll ready");
         self.inner.try_write().unwrap().poll_ready(cx)
     }
@@ -73,6 +73,7 @@ impl Inner {
     }
 
     #[inline]
+    #[instrument(skip(cx))]
     fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<auth::Result<()>> {
         macro_rules! poll {
             ($variant:ident, $future:expr, $attempts:ident) => {
