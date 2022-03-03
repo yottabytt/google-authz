@@ -82,12 +82,14 @@ impl Inner {
                 match $future.get_mut().as_mut().poll(cx) {
                     Poll::Ready(resp) => match resp.and_then(token::Token::try_from) {
                         Ok(token) => {
-                            info!("fetched token: expiry={:?}", token.expiry);
+                            let expiry = token.expiry;
                             self.state = State::Fetched { current: token };
+                            info!("fetched token: expiry={:?}", expiry);
                             break Poll::Ready(Ok(()));
                         }
                         Err(err) => {
                             if $attempts > self.max_retry {
+                                info!("max retries passed");
                                 break Poll::Ready(Err(err));
                             }
                             info!("an error occurred during token fetching: attempts={}, err={:?}", $attempts, err);
@@ -107,7 +109,6 @@ impl Inner {
         }
 
         loop {
-            info!("loopin baby");
             match self.state {
                 State::NotFetched => {
                     info!("token is not fetched");
@@ -123,9 +124,10 @@ impl Inner {
                 }
                 State::Fetched { ref current } => {
                     if !current.expired(Instant::now()) {
+                        info!("token is not expired yet and will expire: expiry={:?}", current.expiry);
                         break Poll::Ready(Ok(()));
                     }
-                    info!("token will expire: expiry={:?}", current.expiry);
+                    info!("token expired and refetching");
                     self.state = State::Refetching {
                         future: RefGuard::new(self.fetcher.fetch()),
                         attempts: 1,
