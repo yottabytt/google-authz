@@ -105,6 +105,7 @@ impl Inner {
         }
 
         loop {
+            println!("loopin baby");
             match self.state {
                 State::NotFetched => {
                     info!("token is not fetched");
