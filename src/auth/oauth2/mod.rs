@@ -40,6 +40,7 @@ impl Oauth2 {
 
     pub fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<auth::Result<()>> {
         if self.inner.try_read().unwrap().can_skip_poll_ready() {
+            println!("can skip poll ready");
             return Poll::Ready(Ok(()));
         }
         println!("cannot skip poll ready");
