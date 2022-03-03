@@ -124,8 +124,14 @@ where
 
     fn call(&mut self, req: Request<B>) -> Self::Future {
         match self.auth.call(req) {
-            Ok(req) => Either::Left(self.service.call(req).map_err(Error::Service)),
-            Err(err) => Either::Right(future::ready(Err(Error::GoogleAuthz(err)))),
+            Ok(req) => {
+                println!("auth call is ok");
+                Either::Left(self.service.call(req).map_err(Error::Service))
+            }
+            Err(err) => {
+                println!("auth call is err");
+                Either::Right(future::ready(Err(Error::GoogleAuthz(err))))
+            }
         }
     }
 }
