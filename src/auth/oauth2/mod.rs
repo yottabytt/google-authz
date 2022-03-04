@@ -1,7 +1,7 @@
 use std::{
     convert::TryFrom as _,
     fmt,
-    sync::Arc,
+    sync::{Arc, RwLock},
     task::{self, Poll},
     time::Instant,
 };
@@ -10,7 +10,6 @@ use hyper::{
     header::{self, AUTHORIZATION},
     Request,
 };
-use parking_lot::RwLock;
 use tracing::{info, instrument};
 
 use crate::{auth, sync::RefGuard};
