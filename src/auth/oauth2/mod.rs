@@ -108,7 +108,6 @@ impl Inner {
         }
 
         loop {
-            info!("before matching on states");
             match self.state {
                 State::NotFetched => {
                     info!("token is not fetched");
@@ -117,6 +116,8 @@ impl Inner {
                         attempts: 1,
                     };
                     info!("changing state to {:?}", self.state);
+                    info!("now inner state is {:?}", self);
+                    
                     //continue;
                 }
                 State::Fetching { ref mut future, attempts } => {
