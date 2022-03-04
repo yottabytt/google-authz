@@ -108,6 +108,7 @@ impl Inner {
         }
 
         loop {
+            info!("before matching on states");
             match self.state {
                 State::NotFetched => {
                     info!("token is not fetched");
