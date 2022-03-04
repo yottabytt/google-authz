@@ -116,6 +116,7 @@ impl Inner {
                         future: RefGuard::new(self.fetcher.fetch()),
                         attempts: 1,
                     };
+                    info!("changing state to {:?}", self.state);
                     //continue;
                 }
                 State::Fetching { ref mut future, attempts } => {
