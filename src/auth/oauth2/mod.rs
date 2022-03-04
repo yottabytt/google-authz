@@ -115,7 +115,7 @@ impl Inner {
                         future: RefGuard::new(self.fetcher.fetch()),
                         attempts: 1,
                     };
-                    continue;
+                    //continue;
                 }
                 State::Fetching { ref mut future, attempts } => {
                     info!("about to fetch token");
@@ -136,7 +136,7 @@ impl Inner {
                         attempts: 1,
                         last: current.clone(),
                     };
-                    continue;
+                    //continue;
                 }
             }
         }
