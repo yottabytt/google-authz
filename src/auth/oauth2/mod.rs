@@ -11,7 +11,7 @@ use hyper::{
     Request,
 };
 use tracing::{info, instrument};
-use parking_lot::RwLock;
+use futures_locks::RwLock;
 
 use crate::{auth, sync::RefGuard};
 
@@ -39,12 +39,12 @@ impl Oauth2 {
     }
 
     pub fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<auth::Result<()>> {
-        if self.inner.read().can_skip_poll_ready() {
+        if self.inner.try_read().unwrap().can_skip_poll_ready() {
             info!("can skip poll ready");
             return Poll::Ready(Ok(()));
         } 
         //info!("cannot skip poll ready");
-        self.inner.write().poll_ready(cx, true)
+        self.inner.try_write().unwrap().poll_ready(cx, true)
     }
 
     #[inline]
