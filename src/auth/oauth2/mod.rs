@@ -1,7 +1,7 @@
 use std::{
     convert::TryFrom as _,
     fmt,
-    sync::{Arc, RwLock},
+    sync::{Arc},
     task::{self, Poll},
     time::Instant,
 };
@@ -11,6 +11,7 @@ use hyper::{
     Request,
 };
 use tracing::{info, instrument};
+use parking_lot::RwLock;
 
 use crate::{auth, sync::RefGuard};
 
@@ -38,12 +39,12 @@ impl Oauth2 {
     }
 
     pub fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<auth::Result<()>> {
-        if self.inner.try_read().unwrap().can_skip_poll_ready() {
+        if self.inner.read().can_skip_poll_ready() {
             info!("can skip poll ready");
             return Poll::Ready(Ok(()));
         } 
         //info!("cannot skip poll ready");
-        self.inner.try_write().unwrap().poll_ready(cx)
+        self.inner.write().poll_ready(cx, true)
     }
 
     #[inline]
@@ -72,7 +73,7 @@ impl Inner {
     }
 
     #[inline]
-    fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<auth::Result<()>> {
+    fn poll_ready(&mut self, cx: &mut task::Context<'_>, from_write: bool) -> Poll<auth::Result<()>> {
         macro_rules! poll {
             ($variant:ident, $future:expr, $attempts:ident) => {
                 poll!($variant, $future, $attempts,)
@@ -103,7 +104,7 @@ impl Inner {
                         }
                     },
                     Poll::Pending => {
-                        info!("in pending.");
+                        info!("in pending : from_write={:?}", from_write);
                         break Poll::Pending;
                     }
                 }
@@ -124,7 +125,7 @@ impl Inner {
                     //continue;
                 }
                 State::Fetching { ref mut future, attempts } => {
-                    info!("about to fetch token");
+                    info!("about to fetch token : from_write={:?}", from_write);
                     poll!(Fetching, future, attempts)
                 }
                 State::Refetching { ref mut future, attempts, ref last } => {
