@@ -122,7 +122,7 @@ impl Inner {
                     info!("changing state to {:?}", self.state);
                     info!("now inner state is {:?}", self);
                     
-                    //continue;
+                    continue;
                 }
                 State::Fetching { ref mut future, attempts } => {
                     info!("about to fetch token : from_write={:?}", from_write);
@@ -143,7 +143,8 @@ impl Inner {
                         attempts: 1,
                         last: current.clone(),
                     };
-                    //continue;
+                    
+                    continue;
                 }
             }
         }
