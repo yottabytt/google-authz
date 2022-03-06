@@ -7,6 +7,7 @@ use hyper::{
     Body, Method, Request, StatusCode, Uri,
 };
 use hyper_rustls::{builderstates::WantsSchemes, HttpsConnector, HttpsConnectorBuilder};
+use tracing::info;
 
 use crate::auth;
 
@@ -52,9 +53,11 @@ impl Client {
             use bytes::Buf as _;
 
             let (parts, body) = fut.await?.into_parts();
+            info!("got response from fut");
             match parts.status {
                 StatusCode::OK => {
                     let buf = aggregate(body).await?;
+                    info!("aggregated response from fut");
                     serde_json::from_reader(buf.reader()).map_err(auth::Error::JsonDeserialize)
                 }
                 _ => Err(auth::Error::StatusCode((parts, body))),
