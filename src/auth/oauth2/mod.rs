@@ -104,7 +104,7 @@ impl Inner {
                         }
                     },
                     Poll::Pending => {
-                        info!("in pending : from_write={:?}", from_write);
+                        info!("in pending : from_write={:?}, cx addr is {:p}", from_write, &cx.waker());
                         break Poll::Pending;
                     }
                 }
