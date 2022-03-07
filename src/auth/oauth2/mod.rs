@@ -40,11 +40,11 @@ impl Oauth2 {
 
     pub fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<auth::Result<()>> {
         if self.inner.read().can_skip_poll_ready() {
-            info!("can skip poll ready");
+            info!("token is available for use. so skipping poll ready");
             return Poll::Ready(Ok(()));
         } 
         //info!("cannot skip poll ready");
-        self.inner.write().poll_ready(cx, true)
+        self.inner.write().poll_ready(cx)
     }
 
     #[inline]
@@ -73,7 +73,7 @@ impl Inner {
     }
 
     #[inline]
-    fn poll_ready(&mut self, cx: &mut task::Context<'_>, from_write: bool) -> Poll<auth::Result<()>> {
+    fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<auth::Result<()>> {
         macro_rules! poll {
             ($variant:ident, $future:expr, $attempts:ident) => {
                 poll!($variant, $future, $attempts,)
@@ -104,7 +104,7 @@ impl Inner {
                         }
                     },
                     Poll::Pending => {
-                        info!("in pending : from_write={:?}, waker addr is {:p}", from_write, &cx.waker());
+                        info!("pending from inner fut. waker addr is {:p}", &cx.waker());
                         break Poll::Pending;
                     }
                 }
@@ -118,18 +118,15 @@ impl Inner {
                     self.state = State::Fetching {
                         future: RefGuard::new(self.fetcher.fetch()),
                         attempts: 1,
-                    };
-                    info!("changing state to {:?}", self.state);
-                    info!("now inner state is {:?}", self);
-                    
+                    };                
                     continue;
                 }
                 State::Fetching { ref mut future, attempts } => {
-                    info!("about to fetch token : from_write={:?}, waker addr is {:p}", from_write, &cx.waker());
+                    info!("about to fetch token. waker addr is {:p}", &cx.waker());
                     poll!(Fetching, future, attempts)
                 }
                 State::Refetching { ref mut future, attempts, ref last } => {
-                    info!("about to refetch token");
+                    info!("about to refetch token. waker addr is {:p}", &cx.waker());
                     poll!(Refetching, future, attempts, last)
                 }
                 State::Fetched { ref current } => {
