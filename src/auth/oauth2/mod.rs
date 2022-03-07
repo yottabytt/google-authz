@@ -84,7 +84,7 @@ impl Inner {
                         Ok(token) => {
                             let expiry = token.expiry;
                             self.state = State::Fetched { current: token };
-                            info!("fetched token: expiry={:?} state={:?}", expiry, self.state);
+                            info!("fetched token: expiry={:?} state={:?} waker addr is {:p}", expiry, self.state, &cx.waker());
                             break Poll::Ready(Ok(()));
                         }
                         Err(err) => {
@@ -104,7 +104,7 @@ impl Inner {
                         }
                     },
                     Poll::Pending => {
-                        info!("in pending : from_write={:?}, cx addr is {:p}", from_write, &cx.waker());
+                        info!("in pending : from_write={:?}, waker addr is {:p}", from_write, &cx.waker());
                         break Poll::Pending;
                     }
                 }
@@ -114,7 +114,7 @@ impl Inner {
         loop {
             match self.state {
                 State::NotFetched => {
-                    info!("token is not fetched");
+                    info!("token is not fetched. waker addr is {:p}", &cx.waker());
                     self.state = State::Fetching {
                         future: RefGuard::new(self.fetcher.fetch()),
                         attempts: 1,
@@ -125,7 +125,7 @@ impl Inner {
                     continue;
                 }
                 State::Fetching { ref mut future, attempts } => {
-                    info!("about to fetch token : from_write={:?}", from_write);
+                    info!("about to fetch token : from_write={:?}, waker addr is {:p}", from_write, &cx.waker());
                     poll!(Fetching, future, attempts)
                 }
                 State::Refetching { ref mut future, attempts, ref last } => {
